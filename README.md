@@ -194,15 +194,8 @@ Android端推荐使用程序: [malp](https://github.com/gateship-one/malp/releas
 **安装upmpdcli**
 
     vi /etc/apt/sources.list.d/upmpdcli.list
- 根据系统改写：
+ 填入以下：
  ```
-- Raspbian Jessie:
-
-deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
-deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
-          
-- Raspbian Stretch AND other armhf Debian (see note below):
-
 deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
 deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
          
