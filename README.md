@@ -189,6 +189,29 @@ excluded_file_extensions =
 
 Android端推荐使用程序: [malp](https://github.com/gateship-one/malp/releases/download/release-25/malp-1.1.16.apk)
 
+**本地音乐库的歌曲来源**
+
+推荐一个网易音乐的下载项目：https://github.com/codezjx/netease-cloud-music-dl
+![](https://github.com/codezjx/netease-cloud-music-dl/raw/master/preview.gif)
+
+首先下载源码：
+
+    $ git clone https://github.com/codezjx/netease-cloud-music-dl.git
+进入根目录，然后执行：
+
+    $ python setup.py install
+最终显示以下log，表示顺利安装：
+```
+running install
+running bdist_egg
+running egg_info
+...
+...
+Finished processing dependencies for netease-cloud-music-dl==x.x.x
+```
+
+后续直接在命令行中通过ncm指令即可快速调用相关功能，**Warning: 目前只支持Python3.x版本**
+
 **为了能播放网络上的音乐，这里安装一个UPnP Renderer ----upmpdcli ，可以直接通过DLNA来播放音乐（苹果用户可以安装[shairport-sync](https://github.com/mikebrady/shairport-sync)）**
 
 **安装upmpdcli**
