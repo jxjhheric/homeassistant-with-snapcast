@@ -190,30 +190,22 @@ excluded_file_extensions =
 Android端推荐使用程序: [malp](https://github.com/gateship-one/malp/releases/download/release-25/malp-1.1.16.apk)
 
 **为了能播放网络上的音乐，这里安装一个UPnP Renderer ----upmpdcli ，可以直接通过DLNA来播放音乐（苹果用户可以安装[shairport-sync](https://github.com/mikebrady/shairport-sync)）**
+
 **安装upmpdcli**
 
     vi /etc/apt/sources.list.d/upmpdcli.list
  根据系统改写：
  ```
-Raspbian Jessie:
+- Raspbian Jessie:
 
 deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
 deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
           
-Raspbian Stretch AND other armhf Debian (see note below):
+- Raspbian Stretch AND other armhf Debian (see note below):
 
 deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
 deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
-          
-Debian Jessie:
-
-deb http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ jessie main
-deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ jessie main
-          
-Non-ARM Debian Stretch:
-
-deb http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ stretch main
-deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ stretch main
+         
 ```
 保存后再运行一下命令：
 ```
@@ -222,8 +214,6 @@ sudo apt-get install upmpdcli
 ```
 当然也可以直接编译：
 ```
-cd
-
 sudo apt-get install build-essential devscripts debhelper quilt cdbs
 sudo apt-get install fakeroot
 sudo apt-get install dh-autoreconf autoconf automake libtool pkg-config
@@ -268,8 +258,8 @@ debuild  -us -uc
 cd ..
 sudo dpkg -i *.deb
 ```
-安装完成后无缝与MPD对接
-
+安装完成后无缝与MPD对接，安卓手机端的网易云音乐等app中就可以看到Umpd的播放设备了！！
+==================================================================================
 **下载并安装snapserver/snapclient**
 ```
 cd /home
@@ -278,3 +268,27 @@ wget http://ftp.cn.debian.org/debian/pool/main/s/snapcast/snapclient_0.13.0-1_ar
 dpkg -i snapclient*
 apt-get -f install #安装缺失的依赖
 ```
+运行程序：
+
+    /etc/init.d/snapserver start
+    /etc/init.d/snapclient start
+    
+[安卓端apk](https://github.com/badaix/snapcast/releases/download/v0.13.0/Snapcast_0.13.0.apk)
+
+**snapcast、mopify接入homeassistant：**
+
+在configuration.yaml中加入：
+
+    media_player:
+      - platform: snapcast
+        host: xxx.xxx.xxx.xxx
+      - platform: mpd
+        host: xxx.xxx.xxx.xxx
+        name: Main Controller
+        
+**homeassistant 自动化**
+
+todo：
+- 音乐随人动
+
+    
