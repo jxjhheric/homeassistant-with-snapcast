@@ -18,7 +18,38 @@ multi-room system with homeassistant、modify and snapcast on pogo e02 and pogo 
 apt-get update
 apt-get upgrade
 ```
+**让USB DAC正常工作**
 
+    apt-get install alsa-utils
+编辑alsa.conf文件
+
+    vi /usr/share/alsa/alsa.conf 
+把
+
+    defaults.ctl.card 0  
+    defaults.pcm.card 0
+中的0改成1
+
+编辑/创建/etc/asound.conf文件
+
+    vi /etc/asound.conf 
+输入如下代码：
+```
+pcm.!default  {
+ type hw card 1
+}
+ctl.!default {
+ type hw card 1
+}
+```
+测试是否工作：
+
+    speaker-test -c2
+调节音量：
+
+    alsamixer -c 1
+DAC一切就绪后就可以开始下面的工作了！！！
+==============================================================================================
 **安装mopify**  
 首先安装mopify来当做音乐播放器  
 
@@ -157,6 +188,87 @@ excluded_file_extensions =
 正确的话可以看到文件夹中的音乐文件了。
 
 Android端推荐使用程序: [malp](https://github.com/gateship-one/malp/releases/download/release-25/malp-1.1.16.apk)
+
+**为了能播放网络上的音乐，这里安装一个UPnP Renderer ----upmpdcli ，可以直接通过DLNA来播放音乐（苹果用户可以安装[shairport-sync](https://github.com/mikebrady/shairport-sync)）**
+**安装upmpdcli**
+
+    vi /etc/apt/sources.list.d/upmpdcli.list
+ 根据系统改写：
+ ```
+Raspbian Jessie:
+
+deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
+deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ jessie main
+          
+Raspbian Stretch AND other armhf Debian (see note below):
+
+deb http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
+deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/raspbian/ stretch main
+          
+Debian Jessie:
+
+deb http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ jessie main
+deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ jessie main
+          
+Non-ARM Debian Stretch:
+
+deb http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ stretch main
+deb-src http://www.lesbonscomptes.com/upmpdcli/downloads/debian/ stretch main
+```
+保存后再运行一下命令：
+```
+sudo apt-get update
+sudo apt-get install upmpdcli
+```
+当然也可以直接编译：
+```
+cd
+
+sudo apt-get install build-essential devscripts debhelper quilt cdbs
+sudo apt-get install fakeroot
+sudo apt-get install dh-autoreconf autoconf automake libtool pkg-config
+sudo apt-get install libexpat1-dev libcurl4-gnutls-dev g++
+sudo apt-get install libmpdclient-dev libmicrohttpd-dev python-requests libjsoncpp-dev
+
+# Only for wheezy:
+# sudo apt-get install hardening-wrapper
+
+# Only for jessie and later
+sudo apt-get install dh-systemd
+
+mkdir build # Or any name you fancy
+cd build 
+
+mkdir libupnp6
+cd libupnp6
+apt-get source libupnp6
+cd libupnp-1.6.20.jfd5/
+debuild -us -uc
+cd ..
+sudo dpkg -i *.deb
+cd ..
+
+# Current dir is now build/
+
+mkdir libupnpp4
+cd libupnpp4
+apt-get source libupnpp4
+cd libupnpp4-0.16.0
+debuild  -us -uc
+cd ..
+sudo dpkg -i *.deb
+
+# Current dir is now build/
+
+mkdir upmpdcli
+cd upmpdcli
+apt-get source upmpdcli
+cd upmpdcli-1.2.15/
+debuild  -us -uc
+cd ..
+sudo dpkg -i *.deb
+```
+安装完成后无缝与MPD对接
 
 **下载并安装snapserver/snapclient**
 ```
