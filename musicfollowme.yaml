@@ -47,18 +47,31 @@ automation:
             - media_player.snapcast_client_00253102e69e
           is_volume_muted: true
           
-  - alias: turn_on_music
+  - alias: turn_on_wwd
     initial_state: 'on'
     trigger:
       - platform: state
         entity_id: switch.wwd
         state: on
-      
-      - service: media_player.play_media
-        data:
-          entity_id: media_player.bedroom
-          media_content_id: http://91.121.134.23:8100/stream
-          media_content_type: 'mp3'
+    action:  
+      - service: media_player.select_source
+        entity_id: media_player.main_controller
+        source: '11'
+  - alias: turn_on_cjfx
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: switch.cjfx
+        state: on
+    action:  
+      - service: media_player.select_source
+        entity_id: media_player.main_controller
+        source: 'cjfx'
+#- service: media_player.play_media
+#data:
+#entity_id: media_player.main_controller
+#media_content_id: http://91.121.134.23:8100/stream
+#media_content_type: 'mp3'
       
       - wait_template: >-
           {{ is_state('input_select.alarm_clock', 'Disabled') }}
@@ -141,3 +154,180 @@ automation:
         data:
           entity_id:
             - media_player.bedroom
+#################################################################
+## Media Players
+
+media_player:
+  - platform: mpd
+    name: 'Mopidy'
+    host: REDACTED.253
+
+#################################################################
+## Groups
+group:
+
+  mopidy_main:
+    entities:
+      - media_player.mopidy
+
+  playlist_control:
+    name: Playlist Control
+    control: hidden
+    entities:
+    - input_select.playlist_content
+    - input_select.playlist_source
+    - script.playlist_remote
+
+#################################################################
+## Inputs
+
+input_select:
+  playlist_content:
+    name: 'Content:'
+    options:
+      - Michigan Radio
+      - Dinner
+      - Jazz
+      - Chicago Blues
+      - USER1's Favorites
+    icon: mdi:playlist-play
+
+  playlist_source:
+    name: 'Source:'
+    options:
+      - Kitchen Stereo
+      - Bedside Speaker
+      - Living Room TV
+      - Bedside/Stereo Speakers
+    initial: Kitchen Stereo
+    icon: mdi:speaker-wireless
+
+#################################################################
+## Scripts
+script:
+
+  playlist_action:
+    sequence:
+
+      - service: media_player.play_media
+        data_template:
+          entity_id: media_player.mopidy
+          media_content_type: 'audio/mp4'
+          media_content_id: >
+            {% if is_state("input_select.playlist_content", "Michigan Radio") %} tunein:station:s23407
+            {% elif is_state("input_select.playlist_content", "Dinner") %} spotify:user:REDACTED
+            {% elif is_state("input_select.playlist_content", "Jazz") %} spotify:user:REDACTED
+            {% elif is_state("input_select.playlist_content", "Chicago Blues") %} REDACTED
+            {% elif is_state("input_select.playlist_content", "USER1's Favorites") %} spotify:user:REDACTED
+            {% endif %}
+      - delay: "00:00:01"
+      - service: media_player.play_media
+        data_template:
+          media_content_id: 'http://REDACTED.253:8000/mopidy.mp3'
+          media_content_type: 'audio/mp4'
+          entity_id: >
+            {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+            {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+            {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+            {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+            {% endif %}
+  playlist_volup:
+    sequence:
+      service: media_player.volume_up
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+          {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+          {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+          {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+          {% endif %}
+  playlist_voldown:
+    sequence:
+      service: media_player.volume_down
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+          {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+          {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+          {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+          {% endif %}
+  playlist_stop:
+    sequence:
+      - service: homeassistant.turn_off
+        entity_id: media_player.mopidy
+      - service: homeassistant.turn_off
+        data_template:
+          entity_id: >
+            {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+            {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+            {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+            {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+            {% endif %}
+#################################################################
+## Automations
+automation:
+
+  # Turn off Mopidy when not in use
+  - alias: Mopidy turn off
+
+    trigger:
+      - platform: state
+        entity_id: media_player.kitchen_stereo
+        to: 'off'
+      - platform: state
+        entity_id: media_player.bedside_speaker
+        to: 'off'
+      - platform: state
+        entity_id: media_player.living_room_tv
+        to: 'off'
+      - platform: state
+        entity_id: media_player.bedsidestereo_speakers
+        to: 'off'
+
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: media_player.kitchen_stereo
+          state: 'off'
+        - condition: state
+          entity_id: media_player.bedside_speaker
+          state: 'off'
+        - condition: state
+          entity_id: media_player.living_room_tv
+          state: 'off'
+        - condition: state
+          entity_id: media_player.bedsidestereo_speakers
+          state: 'off'
+
+    action:
+      - service: homeassistant.turn_off
+        entity_id: media_player.mopidy
+
+  # Mopidy Visable
+  - alias: Mopidy visable true
+
+    trigger:
+      platform: template
+      value_template: "{{ not is_state('media_player.mopidy', 'off') }}"
+
+    action:
+      service: group.set_visibility
+      entity_id: group.mopidy_main
+      data:
+        visible: True
+
+  - alias: Mopidy visable false
+
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: media_player.mopidy
+        to: 'off'
+
+    action:
+      service: group.set_visibility
+      entity_id: group.mopidy_main
+      data:
+        visible: False
