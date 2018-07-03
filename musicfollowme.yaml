@@ -1,5 +1,5 @@
 ################################################################
-## Music follow you with the presence based on BLE
+## Follow Music with the presence based on BLE
 ################################################################
 homeassistant:
 automation:
@@ -50,9 +50,9 @@ automation:
   - alias: turn_on_wwd
     initial_state: 'on'
     trigger:
-      - platform: state
-        entity_id: switch.wwd
-        state: on
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '2432423'
     action:  
       - service: media_player.select_source
         entity_id: media_player.main_controller
@@ -60,13 +60,54 @@ automation:
   - alias: turn_on_cjfx
     initial_state: 'on'
     trigger:
-      - platform: state
-        entity_id: switch.cjfx
-        state: on
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '24334323'
     action:  
       - service: media_player.select_source
         entity_id: media_player.main_controller
         source: 'cjfx'
+  - alias: turn_on_cjfx
+    initial_state: 'on'
+    trigger:
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '223'
+    action:  
+      - service: media_player.select_source
+        entity_id: media_player.main_controller
+        source: 'lsd'
+  - alias: turn_on_cjfx
+    initial_state: 'on'
+    trigger:
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '34323'
+    action:  
+      - service: media_player.select_source
+        entity_id: media_player.main_controller
+        source: 'hdxzd'
+  - alias: volume_up
+    initial_state: 'on'
+    trigger:
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '3433323'
+    action:  
+      - service: media_player.volume_set
+        entity_id: media_player.main_controller
+        volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int + 0.1 }}'
+  - alias: volume_down
+    initial_state: 'on'
+    trigger:
+      - platform: mqtt
+        topic: home/IRtoMQTT
+        payload: '3433323'
+    action:  
+      - service: media_player.volume_set
+        entity_id: media_player.main_controller
+        volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int - 0.1 }}'
+
 #- service: media_player.play_media
 #data:
 #entity_id: media_player.main_controller
