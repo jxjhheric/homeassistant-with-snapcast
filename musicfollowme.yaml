@@ -9,7 +9,7 @@ automation:
       - platform: state
         entity_id: sensor.jkq
         to: '房间'
-        for: 
+        for:
           seconds: 20
     condition:
       - condition: state
@@ -18,16 +18,47 @@ automation:
     action:
       - service: media_player.volume_mute
         data:
-          entity_id: 
-            - media_player.bedroom
-            - media_player.bedroom
+          entity_id:
+            - media_player.snapcast_client_00253102e69e
+            - media_player.snapcast_client_00253105f3a8
           is_volume_muted: true
+
+  - alias: bedroom_not_playing
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: sensor.jkq
+        to: '厨房'
+        for:
+          seconds: 20
+     - platform: state
+        entity_id: sensor.jkq
+        to: '厕所'
+        for:
+          seconds: 20
+    condition:
+      - condition: state
+        entity_id: media_player.main_controller
+        state: playing
+    action:
+      - service: media_player.volume_mute
+        data:
+          entity_id:
+            - media_player.snapcast_client_00253102e69e
+          is_volume_muted: true
+          
+  - alias: turn_on_music
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: switch.wwd
+        state: on
       
       - service: media_player.play_media
         data:
           entity_id: media_player.bedroom
           media_content_id: http://91.121.134.23:8100/stream
-          media_content_type: 'audio/mp4'
+          media_content_type: 'mp3'
       
       - wait_template: >-
           {{ is_state('input_select.alarm_clock', 'Disabled') }}
