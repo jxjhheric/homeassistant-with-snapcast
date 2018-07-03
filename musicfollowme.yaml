@@ -1,0 +1,112 @@
+################################################################
+## Music follow you with the presence based on BLE
+################################################################
+homeassistant:
+automation:
+  - alias: only_bedroom_playing
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: sensor.jkq
+        to: '房间'
+        for: 
+          seconds: 20
+    condition:
+      - condition: state
+        entity_id: media_player.main_controller
+        state: playing
+    action:
+      - service: media_player.volume_mute
+        data:
+          entity_id: 
+            - media_player.bedroom
+            - media_player.bedroom
+          is_volume_muted: true
+      
+      - service: media_player.play_media
+        data:
+          entity_id: media_player.bedroom
+          media_content_id: http://91.121.134.23:8100/stream
+          media_content_type: 'audio/mp4'
+      
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:01:00'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.3
+      
+      - service: media_player.media_stop
+        data:
+          entity_id: media_player.bedroom
+      
+      - service: tts.amazon_polly_say
+        data_template:
+          entity_id: media_player.bedroom
+          message: >
+              Good morning.
+              The forecast for today is {{states.sensor.dark_sky_hourly_summary.state}}
+              {% if states.sensor.netatmo_rain_gauge_sum_rain_1.state | float > 0 %}
+                It has been raining in the last hour.
+              {% endif %}
+              The current temperature is {{states.sensor.netatmo_outside_temperature.state}}{{states.sensor.netatmo_outside_temperature.attributes.unit_of_measurement}}
+              {% if states.sensor.netatmo_outside_min_temp.state | int < 3 %}
+                The overnight low was {{states.sensor.netatmo_outside_min_temp.state }} so be careful for ice when you are driving.
+              {% endif %}
+              {% if states.sensor.dark_sky_visibility.state | int < 2 %}
+                Please be aware that visibility is currently poor.
+              {% endif %}
+      - wait_template: "{{ states.media_player.bedroom.state == 'idle' }}"
+
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+      
+      - service: media_player.play_media
+        data:
+          entity_id: media_player.bedroom
+          media_content_id: http://91.121.134.23:8100/stream
+          media_content_type: 'audio/mp4'
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.3
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.4
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '01:00:00'
+      
+      - service: media_player.turn_off
+        data:
+          entity_id:
+            - media_player.bedroom
