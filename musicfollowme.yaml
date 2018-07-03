@@ -7,14 +7,13 @@ automation:
     initial_state: 'on'
     trigger:
       - platform: state
-        entity_id: sensor.jkq
+        entity_id: sensor.jhh
         to: '房间'
         for:
           seconds: 20
     condition:
-      - condition: state
-        entity_id: media_player.main_controller
-        state: playing
+      - condition: template
+        value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
     action:
       - service: media_player.volume_mute
         data:
@@ -37,23 +36,24 @@ automation:
         for:
           seconds: 20
     condition:
-      - condition: state
-        entity_id: media_player.main_controller
-        state: playing
+      - condition: template
+        value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
     action:
       - service: media_player.volume_mute
         data:
           entity_id:
             - media_player.snapcast_client_00253102e69e
           is_volume_muted: true
-          
+##########################################################
+# Standard remote to Controling MPD
+##########################################################
   - alias: turn_on_wwd
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '2432423'
-    action:  
+    action:
       - service: media_player.select_source
         entity_id: media_player.main_controller
         source: '11'
@@ -61,9 +61,9 @@ automation:
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '24334323'
-    action:  
+    action:
       - service: media_player.select_source
         entity_id: media_player.main_controller
         source: 'cjfx'
@@ -71,9 +71,9 @@ automation:
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '223'
-    action:  
+    action:
       - service: media_player.select_source
         entity_id: media_player.main_controller
         source: 'lsd'
@@ -81,33 +81,75 @@ automation:
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '34323'
-    action:  
+    action:
       - service: media_player.select_source
         entity_id: media_player.main_controller
         source: 'hdxzd'
-  - alias: volume_up
+  - alias: volume_up_mpd
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '3433323'
-    action:  
+    action:
       - service: media_player.volume_set
         entity_id: media_player.main_controller
-        volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int + 0.1 }}'
-  - alias: volume_down
+        data_template:
+          volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int + 0.1 }}'
+  - alias: volume_down_mpd
     initial_state: 'on'
     trigger:
       - platform: mqtt
-        topic: home/IRtoMQTT
+        topic: "home/IRtoMQTT"
         payload: '3433323'
-    action:  
+    action:
       - service: media_player.volume_set
         entity_id: media_player.main_controller
-        volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int - 0.1 }}'
-
+        data_template:
+          volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int - 0.1 }}'
+  - alias: 'MPD_Play’
+    trigger:
+      platform: mqtt
+      topic: "home/IRtoMQTT"
+      payload: '4230927874’
+    action:
+      service: media_player.media_play
+      entity_id: media_player.main_controller
+  - alias: 'MPD_Pause’
+    trigger:
+      platform: mqtt
+      topic: "home/IRtoMQTT"
+      payload: '4230927874’
+    action:
+      service: media_player.media_play
+      entity_id: media_player.main_controller
+  - alias: 'MPD_Stop’
+    trigger:
+      platform: mqtt
+      topic: "home/IRtoMQTT"
+      payload: '4230927874’
+    action:
+      service: media_player.media_stop
+      entity_id: media_player.main_controller
+  - alias: 'MPD_Previous’
+    trigger:
+      platform: mqtt
+      topic: "home/IRtoMQTT"
+      payload: '4230927874’
+    action:
+      service: media_player.media_previous_track
+      entity_id: media_player.main_controller
+  - alias: 'MPD_Next’
+    trigger:
+      platform: mqtt
+      topic: "home/IRtoMQTT"
+      payload: '4230927874’
+    action:
+      service: media_player.media_next_track
+      entity_id: media_player.main_controller
+#############################################################
 #- service: media_player.play_media
 #data:
 #entity_id: media_player.main_controller
