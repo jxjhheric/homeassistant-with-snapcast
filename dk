@@ -1,0 +1,450 @@
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:01:00'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.3
+      
+      - service: media_player.media_stop
+        data:
+          entity_id: media_player.bedroom
+      
+      - service: tts.amazon_polly_say
+        data_template:
+          entity_id: media_player.bedroom
+          message: >
+              Good morning.
+              The forecast for today is {{states.sensor.dark_sky_hourly_summary.state}}
+              {% if states.sensor.netatmo_rain_gauge_sum_rain_1.state | float > 0 %}
+                It has been raining in the last hour.
+              {% endif %}
+              The current temperature is {{states.sensor.netatmo_outside_temperature.state}}{{states.sensor.netatmo_outside_temperature.attributes.unit_of_measurement}}
+              {% if states.sensor.netatmo_outside_min_temp.state | int < 3 %}
+                The overnight low was {{states.sensor.netatmo_outside_min_temp.state }} so be careful for ice when you are driving.
+              {% endif %}
+              {% if states.sensor.dark_sky_visibility.state | int < 2 %}
+                Please be aware that visibility is currently poor.
+              {% endif %}
+      - wait_template: "{{ states.media_player.bedroom.state == 'idle' }}"
+
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+      
+      - service: media_player.play_media
+        data:
+          entity_id: media_player.bedroom
+          media_content_id: http://91.121.134.23:8100/stream
+          media_content_type: 'audio/mp4'
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.2
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.3
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '00:00:20'
+      - service: media_player.volume_set
+        data:
+          entity_id: media_player.bedroom
+          volume_level: 0.4
+
+      - wait_template: >-
+          {{ is_state('input_select.alarm_clock', 'Disabled') }}
+        timeout: '01:00:00'
+      
+      - service: media_player.turn_off
+        data:
+          entity_id:
+            - media_player.bedroom
+#################################################################
+## Media Players
+
+media_player:
+  - platform: mpd
+    name: 'Mopidy'
+    host: REDACTED.253
+
+#################################################################
+## Groups
+group:
+
+  mopidy_main:
+    entities:
+      - media_player.mopidy
+
+  playlist_control:
+    name: Playlist Control
+    control: hidden
+    entities:
+    - input_select.playlist_content
+    - input_select.playlist_source
+    - script.playlist_remote
+
+#################################################################
+## Inputs
+
+input_select:
+  playlist_content:
+    name: 'Content:'
+    options:
+      - Michigan Radio
+      - Dinner
+      - Jazz
+      - Chicago Blues
+      - USER1's Favorites
+    icon: mdi:playlist-play
+
+  playlist_source:
+    name: 'Source:'
+    options:
+      - Kitchen Stereo
+      - Bedside Speaker
+      - Living Room TV
+      - Bedside/Stereo Speakers
+    initial: Kitchen Stereo
+    icon: mdi:speaker-wireless
+
+#################################################################
+## Scripts
+script:
+
+  playlist_action:
+    sequence:
+
+      - service: media_player.play_media
+        data_template:
+          entity_id: media_player.mopidy
+          media_content_type: 'audio/mp4'
+          media_content_id: >
+            {% if is_state("input_select.playlist_content", "Michigan Radio") %} tunein:station:s23407
+            {% elif is_state("input_select.playlist_content", "Dinner") %} spotify:user:REDACTED
+            {% elif is_state("input_select.playlist_content", "Jazz") %} spotify:user:REDACTED
+            {% elif is_state("input_select.playlist_content", "Chicago Blues") %} REDACTED
+            {% elif is_state("input_select.playlist_content", "USER1's Favorites") %} spotify:user:REDACTED
+            {% endif %}
+      - delay: "00:00:01"
+      - service: media_player.play_media
+        data_template:
+          media_content_id: 'http://REDACTED.253:8000/mopidy.mp3'
+          media_content_type: 'audio/mp4'
+          entity_id: >
+            {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+            {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+            {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+            {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+            {% endif %}
+  playlist_volup:
+    sequence:
+      service: media_player.volume_up
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+          {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+          {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+          {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+          {% endif %}
+  playlist_voldown:
+    sequence:
+      service: media_player.volume_down
+      data_template:
+        entity_id: >
+          {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+          {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+          {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+          {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+          {% endif %}
+  playlist_stop:
+    sequence:
+      - service: homeassistant.turn_off
+        entity_id: media_player.mopidy
+      - service: homeassistant.turn_off
+        data_template:
+          entity_id: >
+            {% if is_state("input_select.playlist_source", "Kitchen Stereo") %} media_player.kitchen_stereo
+            {% elif is_state("input_select.playlist_source", "Bedside Speaker") %} media_player.bedside_speaker
+            {% elif is_state("input_select.playlist_source", "Living Room TV") %} media_player.living_room_tv
+            {% elif is_state("input_select.playlist_source", "Bedside/Stereo Speakers") %} media_player.bedsidestereo_speakers
+            {% endif %}
+#################################################################
+## Automations
+automation:
+
+  # Turn off Mopidy when not in use
+  - alias: Mopidy turn off
+
+    trigger:
+      - platform: state
+        entity_id: media_player.kitchen_stereo
+        to: 'off'
+      - platform: state
+        entity_id: media_player.bedside_speaker
+        to: 'off'
+      - platform: state
+        entity_id: media_player.living_room_tv
+        to: 'off'
+      - platform: state
+        entity_id: media_player.bedsidestereo_speakers
+        to: 'off'
+
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: media_player.kitchen_stereo
+          state: 'off'
+        - condition: state
+          entity_id: media_player.bedside_speaker
+          state: 'off'
+        - condition: state
+          entity_id: media_player.living_room_tv
+          state: 'off'
+        - condition: state
+          entity_id: media_player.bedsidestereo_speakers
+          state: 'off'
+
+    action:
+      - service: homeassistant.turn_off
+        entity_id: media_player.mopidy
+
+  # Mopidy Visable
+  - alias: Mopidy visable true
+
+    trigger:
+      platform: template
+      value_template: "{{ not is_state('media_player.mopidy', 'off') }}"
+
+    action:
+      service: group.set_visibility
+      entity_id: group.mopidy_main
+      data:
+        visible: True
+
+  - alias: Mopidy visable false
+
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: media_player.mopidy
+        to: 'off'
+
+    action:
+      service: group.set_visibility
+      entity_id: group.mopidy_main
+      data:
+        visible: False
+#########################################################################
+# Multi-Room Audio
+#
+#  Multi-room audio consists of a network of speakers throughout the
+#  house. Each speaker can be assigned to a channel, and all speakers
+#  on the same channel play the same thing, with time synchronization.
+#
+#  There are three different audio sources:
+#  1) Spotify: librespot acts as a "Spotify Connect"-enabled device.
+#              This means that it can be selected via the mobile app,
+#              desktop client, etc (just like Alexa, for example). The
+#              librespot instance is named "Multi-room audio". Playing
+#              to the device routes audio to the server.
+#  2) Local Music: Music Player Daemon aka "mpd" is a music server that
+#                  manages local audio files.
+#  3) TTS: Text-to-speech messages generated by Home Assistant.
+#
+#  The audio distribution from the server to the speakers is via the
+#  open-source software "snapcast". It has a server component that reads
+#  from a named pipe per audio source, and client components that run
+#  local to each speaker (in my case, on Raspberry Pis). It controls
+#  the channels ("groups") and synchronization.
+#########################################################################
+
+homeassistant:
+  customize:
+    script.all_rooms_audio:
+      friendly_name: Spotify Everywhere
+      icon: mdi:spotify
+      emulated_hue_hidden: false
+    script.ui_tts:
+      friendly_name: Play TTS
+      icon: mdi:play
+    media_player.spotify:
+      emulated_hue_hidden: false
+      emulated_hue_name: speakers
+
+group:
+  # Group snapcast clients.
+  Snapclients:
+    - !secret snapcast_group_1
+    - !secret snapcast_hifiberry1
+    - !secret snapcast_hifiberry2
+    - !secret snapcast_raspberrypi
+    - script.all_rooms_audio
+  # Group TTS-related entities.
+  TTS:
+    - media_player.mpd
+    - input_text.tts
+    - script.ui_tts
+
+# Configure TTS options.
+tts:
+  - platform: google
+    cache: true
+    cache_dir: /tmp/tts
+    time_memory: 300
+  - platform: amazon_polly
+    aws_access_key_id: !secret aws_access_key_id
+    aws_secret_access_key: !secret aws_secret_access_key
+    region_name: !secret aws_region
+  - platform: voicerss
+    api_key: !secret voicerss_api_key
+
+# Input component for on-the-fly TTS.
+input_text:
+  tts:
+    name: Text to speak
+
+media_player:
+  # Snapcast for audio distribution.
+  - platform: snapcast
+    host: localhost
+  # MPD instance for TTS.
+  - platform: mpd
+    host: localhost
+  # Mopidy instance for local music.
+  - platform: mpd
+    name: Local Music
+    host: localhost
+    port: 7600
+  # Spotify cloud connectivity.
+  - platform: spotify
+    client_id: !secret spotify_client_id
+    client_secret: !secret spotify_client_secret
+
+script:
+  # Switch on all speakers and tune to Spotify.
+  all_rooms_audio:
+    sequence:
+      - service: media_player.select_source
+        data:
+          entity_id: media_player.spotify
+          source: 'Multi-Room Audio'
+      - service: media_player.select_source
+        data:
+          entity_id: !secret snapcast_group_1
+          source: 'Spotify'
+      - service: switch.turn_on
+        data:
+          entity_id: switch.hdmi_5
+      - service: hdmi_cec.select_device
+        data:
+          device: '1.2.0.0'
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.tv_input
+          option: 'Multi-Room Audio'
+  # Play a TTS message specified by the UI.
+  ui_tts:
+    sequence:
+      - service: script.turn_on
+        entity_id: script.play_tts
+        data_template:
+          variables:
+            message: '{{states.input_text.tts.state}}'
+  # Play a TTS message. This will interrupt anything playing.
+  # We want to resume whatever was playing, so take a snapshot
+  # of the snapcast state, then switch the source to TTS, play
+  # the message via the TTS MPD instance, and then restore the
+  # snapcast state snapshot after the TTS MPD instance goes
+  # idle (aka finished playing).
+  play_tts:
+    sequence:
+      - service: media_player.snapcast_snapshot
+        data:
+          entity_id:
+            - !secret snapcast_group_1
+            - !secret snapcast_hifiberry1
+            - !secret snapcast_hifiberry2
+            - !secret snapcast_raspberrypi
+      - service: media_player.select_source
+        data:
+          entity_id: !secret snapcast_group_1
+          source: TTS
+      - service: media_player.volume_set
+        data:
+          entity_id:
+            - !secret snapcast_hifiberry1
+            - !secret snapcast_hifiberry2
+            - !secret snapcast_raspberrypi
+          volume_level: 1.0
+      - service_template: "tts.{{states.input_select.tts_engine.state}}_say"
+        data_template:
+          entity_id: media_player.mpd
+          message: "{{message}}"
+      - wait_template: "{{states.media_player.mpd.state == 'off'}}"
+        timeout: 120
+      - service: media_player.snapcast_restore
+        data:
+          entity_id:
+            - !secret snapcast_group_1
+            - !secret snapcast_hifiberry1
+            - !secret snapcast_hifiberry2
+            - !secret snapcast_raspberrypi
+
+automation:
+  # If Spotify starts to play on librespot, change the
+  # snapcast group source to Spotify as well (otherwise
+  # we won't hear anything).
+  - alias: Autoswitch to Spotify source
+    trigger:
+      platform: state
+      to: playing
+      entity_id: media_player.spotify
+    condition:
+      - condition: template
+        value_template: "{{states.media_player.spotify.attributes.source=='Multi-Room Audio'}}"
+    action:
+      - service: media_player.select_source
+        data:
+          entity_id: !secret snapcast_group_1
+          source: Spotify
+      - service: media_player.media_pause
+        entity_id:
+          - media_player.local_music
+  # If the local audio source begins to play, change the
+  # snapcast group source to Local (otherwise we won't hear
+  # anything).
+  - alias: Autoswitch to Local source
+    trigger:
+      platform: state
+      to: playing
+      entity_id: media_player.local_music
+    action:
+      - service: media_player.select_source
+        data:
+          entity_id: !secret snapcast_group_1
+          source: Local
+      - service: media_player.media_pause
+        entity_id:
+          - media_player.spotify
