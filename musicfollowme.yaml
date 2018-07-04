@@ -158,7 +158,7 @@ automation:
     trigger:
       platform: mqtt
       topic: "home/IRtoMQTT"
-      payload: '33730639’
+      payload: '33730639'
     action:
 #      service_template:
 #        {% if is_state('media_player.main_controller','playing') %}
