@@ -12,9 +12,21 @@ automation:
         for:
           seconds: 20
     condition:
-      - condition: template
-        value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
+      condition: and
+      conditions:
+        - condition: template
+          value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
+        - conditon: state
+          entity_id: media_player.main_controller
+          state: 'playing'
     action:
+      - service: media_player.volume_set
+        data_template:
+          entity_id:
+            - media_player.snapcast_client_7277a1e
+            - media_player.snapcast_client_00253105f3a8
+            - media_player.snapcast_client_00253102e69e
+          volume_level: '{{ states.media_player.main_controller.attributes.volume_level }}'
       - service: media_player.volume_mute
         data:
           entity_id:
@@ -30,22 +42,34 @@ automation:
         to: '厨房'
         for:
           seconds: 20
-     - platform: state
+      - platform: state
         entity_id: sensor.jkq
         to: '厕所'
         for:
           seconds: 20
     condition:
-      - condition: template
-        value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
+      condition: and
+      conditions:
+        - condition: template
+          value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
+        - conditon: state
+          entity_id: media_player.main_controller
+          state: 'playing'
     action:
+      - service: media_player.volume_set
+        data_template:
+          entity_id:
+            - media_player.snapcast_client_7277a1e
+            - media_player.snapcast_client_00253105f3a8
+            - media_player.snapcast_client_00253102e69e
+          volume_level: '{{ states.media_player.main_controller.attributes.volume_level }}'
       - service: media_player.volume_mute
         data:
           entity_id:
             - media_player.snapcast_client_00253102e69e
           is_volume_muted: true
 ##########################################################
-# Standard remote to Controling MPD
+# Standard IR remote to Control MPD 
 ##########################################################
   - alias: turn_on_wwd
     initial_state: 'on'
@@ -55,8 +79,9 @@ automation:
         payload: '33737269'
     action:
       - service: media_player.select_source
-        entity_id: media_player.main_controller
-        source: '11'
+        data:
+          entity_id: media_player.main_controller
+          source: '11'
   - alias: turn_on_cjfx
     initial_state: 'on'
     trigger:
@@ -65,8 +90,9 @@ automation:
         payload: '33741349'
     action:
       - service: media_player.select_source
-        entity_id: media_player.main_controller
-        source: 'cjfx'
+        data:
+          entity_id: media_player.main_controller
+          source: 'cjfx'
   - alias: turn_on_lsd
     initial_state: 'on'
     trigger:
@@ -75,8 +101,9 @@ automation:
         payload: '33745429'
     action:
       - service: media_player.select_source
-        entity_id: media_player.main_controller
-        source: 'lsd'
+        data:
+          entity_id: media_player.main_controller
+          source: 'lsd'
   - alias: turn_on_hdxzd
     initial_state: 'on'
     trigger:
@@ -85,8 +112,9 @@ automation:
         payload: '33696469'
     action:
       - service: media_player.select_source
-        entity_id: media_player.main_controller
-        source: 'hdxzd'
+        data:
+          entity_id: media_player.main_controller
+          source: 'hdxzd'
   - alias: volume_up_mpd
     initial_state: 'on'
     trigger:
@@ -95,8 +123,8 @@ automation:
         payload: '33738799'
     action:
       - service: media_player.volume_set
-        entity_id: media_player.main_controller
         data_template:
+          entity_id: media_player.main_controller
           volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int + 0.1 }}'
   - alias: volume_down_mpd
     initial_state: 'on'
@@ -106,17 +134,9 @@ automation:
         payload: '33714319'
     action:
       - service: media_player.volume_set
-        entity_id: media_player.main_controller
         data_template:
+          entity_id: media_player.main_controller
           volume_level: '{{ states.media_player.main_controller.attributes.volume_level | int - 0.1 }}'
-  - alias: 'MPD_Play'
-    trigger:
-      platform: mqtt
-      topic: "home/IRtoMQTT"
-      payload: '4230927874’
-    action:
-      service: media_player.media_play
-      entity_id: media_player.main_controller
   - alias: 'MPD_Play_Pause'
     trigger:
       platform: mqtt
