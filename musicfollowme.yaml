@@ -188,5 +188,5 @@ automation:
 #- service: media_player.play_media
 #data:
 #entity_id: media_player.main_controller
-#media_content_id: http://91.121.134.23:8100/stream
-#media_content_type: 'mp3'
+#media_content_id: '11'
+#media_content_type: 'playlist'
