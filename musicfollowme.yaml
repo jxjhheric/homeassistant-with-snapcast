@@ -68,6 +68,23 @@ automation:
           entity_id:
             - media_player.snapcast_client_00253102e69e
           is_volume_muted: true
+  - alias: restore_volume_when_playing
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: media_player.main_controller
+        to: 'playing'
+    condition:
+        - condition: template
+          value_template: "{{states.media_player.main_controller.attributes.source==''}}"
+    action:
+      - service: media_player.volume_set
+        data_template:
+          entity_id:
+            - media_player.snapcast_client_7277a1e
+            - media_player.snapcast_client_00253105f3a8
+            - media_player.snapcast_client_00253102e69e
+          volume_level: '{{ states.media_player.main_controller.attributes.volume_level }}'
 ##########################################################
 # Standard IR remote to Control MPD 
 ##########################################################
