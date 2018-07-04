@@ -16,7 +16,7 @@ automation:
       conditions:
         - condition: template
           value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
-        - conditon: state
+        - condition: state
           entity_id: media_player.main_controller
           state: 'playing'
     action:
@@ -52,7 +52,7 @@ automation:
       conditions:
         - condition: template
           value_template: "{{states.media_player.main_controller.attributes.source=='11' or states.media_player.main_controller.attributes.source=='cjfx' or states.media_player.main_controller.attributes.source=='lsd' or states.media_player.main_controller.attributes.source=='hdxzd' }}"
-        - conditon: state
+        - condition: state
           entity_id: media_player.main_controller
           state: 'playing'
     action:
