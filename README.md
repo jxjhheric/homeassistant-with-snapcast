@@ -304,7 +304,6 @@ apt-get -f install #安装缺失的依赖
         
 **homeassistant 自动化**
 
-todo：
-- 音乐随人动
-
-    
+~~todo：~~
+~~- 音乐随人动~~
+把musicfollowme.yaml放入homeassistant的config/packages文件夹中，重启即可！
