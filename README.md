@@ -279,8 +279,8 @@ sudo dpkg -i *.deb
 **下载并安装snapserver/snapclient**
 ```
 cd /home
-wget http://ftp.cn.debian.org/debian/pool/main/s/snapcast/snapserver_0.13.0-1_armel.deb
-wget http://ftp.cn.debian.org/debian/pool/main/s/snapcast/snapclient_0.13.0-1_armel.deb
+wget http://ftp.cn.debian.org/debian/pool/main/s/snapcast/snapserver_0.15.0-1_armel.deb
+wget http://ftp.cn.debian.org/debian/pool/main/s/snapcast/snapclient_0.15.0-1_armel.deb
 dpkg -i snapclient*
 apt-get -f install #安装缺失的依赖
 ```
